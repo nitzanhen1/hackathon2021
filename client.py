@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Fri Dec 24 18:29:11 2021
 
@@ -61,7 +60,7 @@ MAGIC_COOKIE = 0xabcddcba
 MSG_TYPE = 0x2
 
 class Client:
-    def __init__(self):
+    def _init_(self):
         self.team_name = "PD"+ str(random.randint(0,10))
         self.ip = CLIENT_IP
         self.udp_socket = socket(AF_INET, SOCK_DGRAM)
@@ -131,5 +130,3 @@ class Client:
 
 client=Client()
 client.start_run()
-
-

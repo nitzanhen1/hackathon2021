@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Fri Dec 24 18:29:01 2021
 
@@ -72,7 +71,7 @@ MAGIC_COOKIE = 0xabcddcba
 MSG_TYPE = 0x2
 
 class Server:
-    def __init__(self):
+    def _init_(self):
         self.udp_socket = socket(AF_INET, SOCK_DGRAM)
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
         self.connections = {} # Players: "player1":
@@ -125,9 +124,9 @@ class Server:
         for player,tup_client in self.connections.items():
             tup_client[0].send(msg.encode())
         #TODO : time out 10 seconds
-        winner="Game Over!"
-        winner+="The correct answer was "+ ans+"!"
-        winner +="Congratualations to the winner:"
+        winner = "Game Over!\n"
+        winner += "The correct answer was " + ans+"!\n"
+        winner += "Congratulations to the winner:\n"
         ans_client, addr_client = self.tcp_socket.recv(BUFFER_SIZE).decode()
         #if ans_client[0] == ans:
 
