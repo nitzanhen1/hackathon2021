@@ -4,19 +4,16 @@ Created on Fri Dec 24 18:29:01 2021
 
 @author: ניצן חן
 """
+import socket
 
+'''
 import socket
 import threading
 
 HEADER = 64
-'''
-PORT = 13117
-SERVER = socket.gethostbyname(socket.gethostname())
-print(SERVER)
-ADDR = (SERVER, PORT)
-'''
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
+
 
 UDPserver = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 UDPserver.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -54,3 +51,78 @@ def start():
 
 print("[STARTING] server is starting...")
 start()
+'''
+
+
+
+import enum
+import time
+import traceback
+from socket import *
+from threading import *
+import struct
+import random
+
+SERVER_IP = gethostbyname(gethostname())
+UDP_SERVER_PORT = 12177  # //TODO: random?
+TCP_SERVER_PORT = 2037  #TODO: check?
+UDP_DEST_PORT = 13117
+BUFFER_SIZE = 2048
+MAGIC_COOKIE = 0xabcddcba
+MSG_TYPE = 0x2
+
+class Server:
+    def __init__(self):
+        self.udp_socket = socket(AF_INET, SOCK_DGRAM)
+        self.tcp_socket = socket(AF_INET, SOCK_STREAM)
+        self.connections = {} # Players: "player1":
+        self.game_treads = {}#?
+        self.players = {}#?
+        self.equations = [('1+1',2), ('1+2',3)]#TODO change to dict+change the questions
+
+    def send_broadcast_messages(self, udp_socket):
+        print(f"Server started, listening on IP address {SERVER_IP}")  #TODO where?
+        message_to_send = struct.pack('Ibh', MAGIC_COOKIE, MSG_TYPE, TCP_SERVER_PORT)
+        while len(self.connections) < 2:
+            udp_socket.sendto(message_to_send, ('<broadcast>', UDP_DEST_PORT))
+            time.sleep(1)
+
+
+    def accept_conn(self, broadcast_thread, tcp_socket):
+        while broadcast_thread.is_alive():
+            print(len(self.connections))
+            try:
+                client_socket, client_address = tcp_socket.accept()
+                player = client_socket.recv(2048).decode()
+                print(player)
+                self.connections[player] = {"client_socket": client_socket, "address": client_address}#TODO tuple
+            except timeout:
+                # traceback.print_exc()
+                continue
+
+
+    def waiting_for_clients(self):
+        """
+            This function sends UDP broadcast messages each 1 sec
+            for 10 seconds and listening for clients responses.
+        """
+        self.udp_socket.bind(('', UDP_SERVER_PORT))
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)  # as is
+
+        self.tcp_socket.bind(('', TCP_SERVER_PORT))
+        self.tcp_socket.listen(20)
+        self.tcp_socket.settimeout(1) # ???
+        broadcast_thread = Thread(target=self.send_broadcast_messages, args=(self.udp_socket,))
+        accpt_conn_thread = Thread(target=self.accept_conn, args=(broadcast_thread, self.tcp_socket))
+        broadcast_thread.start()
+        accpt_conn_thread.start()
+        # broadcast_thread.join() # Changed by Peleg.
+        accpt_conn_thread.join()
+        self.udp_socket.close()
+        self.tcp_socket.close()
+
+
+
+server=Server()
+#while True:
+server.waiting_for_clients()
