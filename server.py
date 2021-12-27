@@ -78,7 +78,7 @@ class Server:
         self.connections = {} # Players: "player1":
         self.game_treads = {}#?
         self.players = {}#?
-        self.equations = [('1+1',2), ('1+2',3)]#TODO change to dict+change the questions
+        self.equations = {'1+1':'2', '1+2':'3'}#TODO change to dict+change the questions
 
     def send_broadcast_messages(self, udp_socket):
         print(f"Server started, listening on IP address {SERVER_IP}")  #TODO where?
@@ -95,10 +95,47 @@ class Server:
                 client_socket, client_address = tcp_socket.accept()
                 player = client_socket.recv(2048).decode()
                 print(player)
-                self.connections[player] = {"client_socket": client_socket, "address": client_address}#TODO tuple
+                self.connections[player] = (client_socket,  client_address)
+                print("client connected:"+ str(player)+" sock: "+ str(client_socket)+" addr: "+str(client_address))
             except timeout:
                 # traceback.print_exc()
                 continue
+        time.sleep(3)# TODO 10 sec
+        self.playGame()
+
+
+        while True:#TODO: delete
+            print("play game")
+            time.sleep(1)
+
+    def playGame(self):
+        players= list(self.connections)
+        player1 = players[0]
+        player2 = players[1]
+        msg = "Welcome to Quick Maths.\n"
+        msg += "Player 1: "+str(player1)
+        msg += "Player 2: "+str(player2)
+        msg += "==\n"
+        msg += "Please answer the following question as fast as you can:\n"
+        questions = list(self.equations)  # TODO: save attribute
+        inx = random.randint(0,len(questions)-1)
+        q1 = questions[inx]
+        ans = self.equations[q1]
+        msg += "How much is "+str(q1)+"?"
+        for player,tup_client in self.connections.items():
+            tup_client[0].send(msg.encode())
+        #TODO : time out 10 seconds
+        winner="Game Over!"
+        winner+="The correct answer was "+ ans+"!"
+        winner +="Congratualations to the winner:"
+        ans_client, addr_client = self.tcp_socket.recv(BUFFER_SIZE).decode()
+        #if ans_client[0] == ans:
+
+
+
+
+
+
 
 
     def waiting_for_clients(self):
@@ -120,6 +157,7 @@ class Server:
         accpt_conn_thread.join()
         self.udp_socket.close()
         self.tcp_socket.close()
+
 
 
 
