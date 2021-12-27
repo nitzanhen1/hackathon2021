@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
 """
 Created on Fri Dec 24 18:29:11 2021
 
 @author: ניצן חן
 """
+import random
+
 '''
 import socket
 
@@ -59,12 +60,10 @@ MAGIC_COOKIE = 0xabcddcba
 MSG_TYPE = 0x2
 
 class Client:
-    def __init__(self):
-        self.team_name = "PD1"
+    def _init_(self):
+        self.team_name = "PD"+ str(random.randint(0,10))
         self.ip = CLIENT_IP
         self.udp_socket = socket(AF_INET, SOCK_DGRAM)
-        self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-        self.udp_socket.bind(('', localPORTUDP))  # bind socket to local port number ??
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)#?
         self.game_is_on = False
 
@@ -97,8 +96,9 @@ class Client:
         and then sends the Client's Team Name to the Server
         """
         print("Client Started, listening for offer requests...")
-        #self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-        #self.udp_socket.bind(('', localPORTUDP))  # bind socket to local port number ??
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.udp_socket.bind(('', localPORTUDP))  # bind socket to local port number ??
 
         while True:
             try:
@@ -111,14 +111,18 @@ class Client:
                     continue
                 print(f'Received offer from {server_address[0]}, attempting to connect...')
                 self.connect_to_server(server_address[0], server_port)
-                try:
-                    print('good')
-                    # send team name to server
-                    self.send_name()
-                except:
-                    print('bad')
-                    self.tcp_socket.close() # why?
-                    continue
+                self.send_name()
+                while True:
+                    try:
+                        data = self.tcp_socket.recv(BUFFER_SIZE).decode()
+                        print(data)
+                        ans = input() #TODO: verify 1 char
+                        self.tcp_socket.send(ans.encode())
+                    except:
+                        print('bad')
+                        self.tcp_socket.close() # why?
+                        break
+
                 break
             except:
                 continue
@@ -126,5 +130,3 @@ class Client:
 
 client=Client()
 client.start_run()
-
-
