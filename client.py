@@ -1,41 +1,6 @@
-"""
-Created on Fri Dec 24 18:29:11 2021
+# -- coding: utf-8 --
 
-@author: ניצן חן
-"""
 import random
-
-'''
-import socket
-
-HEADER = 64
-PORT = 5050
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = socket.gethostbyname(socket.gethostname())
-print(SERVER)
-ADDR = (SERVER, PORT)
-
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
-
-def send(msg):
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (HEADER - len(send_length))
-    client.send(send_length)
-    client.send(message)
-    print(client.recv(2048).decode(FORMAT))
-
-send("Hello World!")
-input()
-send("Hello Everyone!")
-input()
-send("Hello Tim!")
-
-send(DISCONNECT_MESSAGE)
-'''
 import struct
 import time
 import traceback
@@ -60,7 +25,7 @@ MAGIC_COOKIE = 0xabcddcba
 MSG_TYPE = 0x2
 
 class Client:
-    def _init_(self):
+    def __init__(self):
         self.team_name = "PD"+ str(random.randint(0,10))
         self.ip = CLIENT_IP
         self.udp_socket = socket(AF_INET, SOCK_DGRAM)
@@ -78,6 +43,7 @@ class Client:
     def send_name(self):
         msg = self.team_name + '\n'
         self.tcp_socket.send(msg.encode())
+        print("send"+ str(msg))
 
     def send_to_server(self, event):
         """
@@ -112,15 +78,16 @@ class Client:
                 print(f'Received offer from {server_address[0]}, attempting to connect...')
                 self.connect_to_server(server_address[0], server_port)
                 self.send_name()
-                while True:
+                while True:  #game
                     try:
-                        data = self.tcp_socket.recv(BUFFER_SIZE).decode()
+                        data = self.tcp_socket.recv(BUFFER_SIZE).decode()  #questions
                         print(data)
-                        ans = input() #TODO: verify 1 char
+                        ans = input()  #TODO: verify 1 char, time out
+                        print(ans)
                         self.tcp_socket.send(ans.encode())
                     except:
                         print('bad')
-                        self.tcp_socket.close() # why?
+                        self.tcp_socket.close()  # why?
                         break
 
                 break

@@ -1,59 +1,6 @@
-"""
-Created on Fri Dec 24 18:29:01 2021
+# -- coding: utf-8 --
 
-@author: ניצן חן
-"""
 import socket
-
-'''
-import socket
-import threading
-
-HEADER = 64
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
-
-
-UDPserver = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-UDPserver.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-UDPserver.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-UDPserver.bind(('', 13117))
-
-
-def handle_client(conn, addr):
-    print(f"[NEW CONNECTION] {addr} connected.")
-
-    connected = True
-    while connected:
-        msg_length = conn.recv(HEADER).decode(FORMAT)
-        if msg_length:
-            msg_length = int(msg_length)
-            msg = conn.recv(msg_length).decode(FORMAT)
-            if msg == DISCONNECT_MESSAGE:
-                connected = False
-
-            print(f"[{addr}] {msg}")
-            conn.send("Msg received".encode(FORMAT))
-
-    conn.close()
-
-
-def start():
-    server.listen()
-    print(f"[LISTENING] Server is listening on {SERVER}")
-    while True:
-        conn, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
-        thread.start()
-        print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
-
-
-print("[STARTING] server is starting...")
-start()
-'''
-
-
-
 import enum
 import time
 import traceback
@@ -71,7 +18,7 @@ MAGIC_COOKIE = 0xabcddcba
 MSG_TYPE = 0x2
 
 class Server:
-    def _init_(self):
+    def __init__(self):
         self.udp_socket = socket(AF_INET, SOCK_DGRAM)
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
         self.connections = {} # Players: "player1":
@@ -80,6 +27,7 @@ class Server:
         self.equations = {'1+1':'2', '1+2':'3'}#TODO change to dict+change the questions
 
     def send_broadcast_messages(self, udp_socket):
+        print("in broadcast")
         print(f"Server started, listening on IP address {SERVER_IP}")  #TODO where?
         message_to_send = struct.pack('Ibh', MAGIC_COOKIE, MSG_TYPE, TCP_SERVER_PORT)
         while len(self.connections) < 2:
@@ -88,7 +36,8 @@ class Server:
 
 
     def accept_conn(self, broadcast_thread, tcp_socket):
-        while broadcast_thread.is_alive():
+        print("in accept")
+        while broadcast_thread.is_alive() and len(self.connections)<2:
             print(len(self.connections))
             try:
                 client_socket, client_address = tcp_socket.accept()
@@ -109,6 +58,7 @@ class Server:
 
     def playGame(self):
         players= list(self.connections)
+        print(players)
         player1 = players[0]
         player2 = players[1]
         msg = "Welcome to Quick Maths.\n"
@@ -116,7 +66,7 @@ class Server:
         msg += "Player 2: "+str(player2)
         msg += "==\n"
         msg += "Please answer the following question as fast as you can:\n"
-        questions = list(self.equations)  # TODO: save attribute
+        questions = list(self.equations)
         inx = random.randint(0,len(questions)-1)
         q1 = questions[inx]
         ans = self.equations[q1]
@@ -127,14 +77,14 @@ class Server:
         winner = "Game Over!\n"
         winner += "The correct answer was " + ans+"!\n"
         winner += "Congratulations to the winner:\n"
-        ans_client, addr_client = self.tcp_socket.recv(BUFFER_SIZE).decode()
-        #if ans_client[0] == ans:
-
-
-
-
-
-
+        while True:
+            try:
+                ans_client = self.tcp_socket.recv(BUFFER_SIZE).decode()
+                print(ans_client)
+                #print(addr_client)
+                # if ans_client[0] == ans:
+            except timeout:
+                continue
 
 
     def waiting_for_clients(self):
@@ -152,7 +102,7 @@ class Server:
         accpt_conn_thread = Thread(target=self.accept_conn, args=(broadcast_thread, self.tcp_socket))
         broadcast_thread.start()
         accpt_conn_thread.start()
-        # broadcast_thread.join() # Changed by Peleg.
+        # broadcast_thread.join() #????
         accpt_conn_thread.join()
         self.udp_socket.close()
         self.tcp_socket.close()
