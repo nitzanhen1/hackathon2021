@@ -10,8 +10,8 @@ import struct
 import random
 
 SERVER_IP = gethostbyname(gethostname())
-UDP_SERVER_PORT = 12177  # //TODO: random?
-TCP_SERVER_PORT = 2037  #TODO: check?
+UDP_SERVER_PORT = 2037  # //TODO: random?
+TCP_SERVER_PORT = 12177   #TODO: check?
 UDP_DEST_PORT = 13117
 BUFFER_SIZE = 2048
 MAGIC_COOKIE = 0xabcddcba
@@ -22,6 +22,9 @@ class Server:
         self.udp_socket = socket(AF_INET, SOCK_DGRAM)
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
         self.connections = {} # Players: "player1":
+        self.players_names = []
+        self.players_sockets = []
+        self.players_addr = []
         self.game_treads = {}#?
         self.players = {}#?
         self.equations = {'1+1':'2', '1+2':'3'}#TODO change to dict+change the questions
@@ -42,46 +45,52 @@ class Server:
             try:
                 client_socket, client_address = tcp_socket.accept()
                 player = client_socket.recv(2048).decode()
+                self.players_names.append(player)
                 print(player)
                 self.connections[player] = (client_socket,  client_address)
+                self.players_sockets.append(client_socket)
+                self.players_addr.append(client_address)
                 print("client connected:"+ str(player)+" sock: "+ str(client_socket)+" addr: "+str(client_address))
             except timeout:
                 # traceback.print_exc()
                 continue
         time.sleep(3)# TODO 10 sec
-        self.playGame()
 
+        questions = list(self.equations)
+        inx = random.randint(0, len(questions) - 1)
+        q1 = questions[inx]
+
+        player1_conn = Thread(target=self.playGame, args=(self.players_sockets[0],self.players_names[0],q1))
+        player2_conn = Thread(target=self.playGame, args=(self.players_sockets[1],self.players_names[1],q1))
+
+        player1_conn.start()
+        player2_conn.start()
 
         while True:#TODO: delete
             print("play game")
             time.sleep(1)
 
-    def playGame(self):
-        players= list(self.connections)
-        print(players)
-        player1 = players[0]
-        player2 = players[1]
+    def playGame(self,player_socket, player_name,q1):
         msg = "Welcome to Quick Maths.\n"
-        msg += "Player 1: "+str(player1)
-        msg += "Player 2: "+str(player2)
+        msg += "Player 1: "+str(self.players_names[0])
+        msg += "Player 2: "+str(self.players_names[1])
         msg += "==\n"
         msg += "Please answer the following question as fast as you can:\n"
-        questions = list(self.equations)
-        inx = random.randint(0,len(questions)-1)
-        q1 = questions[inx]
+
         ans = self.equations[q1]
         msg += "How much is "+str(q1)+"?"
-        for player,tup_client in self.connections.items():
-            tup_client[0].send(msg.encode())
+
+        player_socket.send(msg.encode())
+
         #TODO : time out 10 seconds
         winner = "Game Over!\n"
         winner += "The correct answer was " + ans+"!\n"
         winner += "Congratulations to the winner:\n"
         while True:
             try:
-                ans_client = self.tcp_socket.recv(BUFFER_SIZE).decode()
+                ans_client = self.player_socket.recv(BUFFER_SIZE).decode()
                 print(ans_client)
-                #print(addr_client)
+                print(player_name)
                 # if ans_client[0] == ans:
             except timeout:
                 continue
@@ -92,10 +101,10 @@ class Server:
             This function sends UDP broadcast messages each 1 sec
             for 10 seconds and listening for clients responses.
         """
-        self.udp_socket.bind(('', UDP_SERVER_PORT))
+        self.udp_socket.bind((SERVER_IP, UDP_SERVER_PORT))
         self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)  # as is
 
-        self.tcp_socket.bind(('', TCP_SERVER_PORT))
+        self.tcp_socket.bind((SERVER_IP, TCP_SERVER_PORT))
         self.tcp_socket.listen(20)
         self.tcp_socket.settimeout(1) # ???
         broadcast_thread = Thread(target=self.send_broadcast_messages, args=(self.udp_socket,))
@@ -108,8 +117,19 @@ class Server:
         self.tcp_socket.close()
 
 
+def Main():
+    server = Server()
+    while True:
+        server.waiting_for_clients()
+        #t1 = threading.Thread(target=acceptThreadFunction, args=(server,))
+        #t1.start()
+        #server.waitForClients()
+        #server.manageGame()
 
 
-server=Server()
+if __name__ == '__main__':
+    Main()
+
+#server=Server()
 #while True:
-server.waiting_for_clients()
+#server.waiting_for_clients()

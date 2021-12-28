@@ -62,8 +62,8 @@ class Client:
         and then sends the Client's Team Name to the Server
         """
         print("Client Started, listening for offer requests...")
-        self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1) #TODO try to delete
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1) #TODO change to port
         self.udp_socket.bind(('', localPORTUDP))  # bind socket to local port number ??
 
         while True:
