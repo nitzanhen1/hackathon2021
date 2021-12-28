@@ -91,17 +91,18 @@ class Server:
         print(winner)
 
         print(self.answers)
+
         try:
             self.players_sockets[0].send(winner.encode())
         except:
             print(f" disconnected: {self.players_names[0]}")
-        self.players_sockets[0].close()
+        #self.players_sockets[0].close()
 
         try:
             self.players_sockets[1].send(winner.encode())
         except:
             print(f" disconnected: {self.players_names[1]}")
-        self.players_sockets[1].close()
+        #self.players_sockets[1].close()
 
         print("Game over, sending out offer requests...")
 

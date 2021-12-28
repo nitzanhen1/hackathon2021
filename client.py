@@ -2,6 +2,8 @@
 
 import random
 import struct
+import sys
+
 import select
 import time
 import traceback
@@ -9,6 +11,7 @@ from struct import *
 from socket import *
 import enum
 from msvcrt import getch
+from msvcrt import getche
 from threading import Thread
 #import keyboard
 #from scapy.all import *
@@ -84,8 +87,9 @@ class Client:
                         data = self.tcp_socket.recv(BUFFER_SIZE).decode()  #questions
                         print(data)
                         ans = input()  #TODO: verify 1 char, time out
-                        #i, o, e = select.select([self.tcp_socket],[],[],10)
-                        print(ans)
+                        #ans = getche()
+
+                        #   print("input timeout")
                         self.tcp_socket.send(ans.encode())
                     except:
                         print('bad')
