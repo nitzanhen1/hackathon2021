@@ -2,6 +2,7 @@
 
 import random
 import struct
+import select
 import time
 import traceback
 from struct import *
@@ -77,12 +78,13 @@ class Client:
                     continue
                 print(f'Received offer from {server_address[0]}, attempting to connect...')
                 self.connect_to_server(server_address[0], server_port)
-                self.send_name()
+                self.send_name() #TODO: what if client doesnt send name?
                 while True:  #game
                     try:
                         data = self.tcp_socket.recv(BUFFER_SIZE).decode()  #questions
                         print(data)
                         ans = input()  #TODO: verify 1 char, time out
+                        #i, o, e = select.select([self.tcp_socket],[],[],10)
                         print(ans)
                         self.tcp_socket.send(ans.encode())
                     except:
