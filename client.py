@@ -16,7 +16,7 @@ class Client:
         self.udp_socket = socket(AF_INET, SOCK_DGRAM)
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
         self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
-        self.udp_socket.bind(('', localPORTUDP))
+        self.udp_socket.bind(('172.99.255.255', localPORTUDP))
 
     def connect_to_server(self, server_ip, server_port):
         """
