@@ -11,7 +11,7 @@ import random
 from scapy.arch import get_if_addr
 
 SERVER_IP = get_if_addr("eth2") #'172.99.0.37'
-UDP_SERVER_PORT = 2037
+UDP_SERVER_PORT = 0
 TCP_SERVER_PORT = 12177
 UDP_DEST_PORT = 13117
 BUFFER_SIZE = 2048
@@ -23,10 +23,12 @@ class Server:
     def __init__(self):
         self.udp_socket = socket(AF_INET, SOCK_DGRAM,IPPROTO_UDP)
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
-        self.udp_socket.bind(('172.99.255.255', UDP_DEST_PORT))
+        self.udp_socket.bind(('172.99.255.255', UDP_SERVER_PORT))
         self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)  # as is
         self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
         self.tcp_socket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.tcp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.tcp_socket.bind((SERVER_IP, TCP_SERVER_PORT))
         #self.tcp_socket.listen(20)
         self.tcp_socket.settimeout(1)
