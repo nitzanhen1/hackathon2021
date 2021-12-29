@@ -10,9 +10,11 @@ import traceback
 from struct import *
 from socket import *
 import enum
-from msvcrt import getch
-from msvcrt import getche
+import msvcrt
+#from msvcrt import getch
+#from msvcrt import getche
 from threading import Thread
+import signal
 #import keyboard
 #from scapy.all import *
 
@@ -82,24 +84,72 @@ class Client:
                 print(f'Received offer from {server_address[0]}, attempting to connect...')
                 self.connect_to_server(server_address[0], server_port)
                 self.send_name() #TODO: what if client doesnt send name?
-                while True:  #game
-                    try:
-                        data = self.tcp_socket.recv(BUFFER_SIZE).decode()  #questions
-                        print(data)
-                        ans = input()  #TODO: verify 1 char, time out
-                        #ans = getche()
-
-                        #   print("input timeout")
-                        self.tcp_socket.send(ans.encode())
-                    except:
-                        print('bad')
-                        self.tcp_socket.close()  # why?
-                        break
+                self.connected()
 
                 break
             except:
                 continue
         self.udp_socket.close()
+
+    def connected(self):
+        while True:  # game
+            try:
+                #server welcome msg
+                question = self.tcp_socket.recv(BUFFER_SIZE).decode()  # questions
+                print(question)
+                break
+            except:
+                print('connect bad')
+                self.tcp_socket.close()  # why?
+                break
+        # go into game
+
+        timeout = 5
+        startTime=  time.time()
+        inp = None
+        while True:
+            if msvcrt.kbhit():
+                inp = msvcrt.getch.getch()
+                print("inp")
+                break
+            elif time.time() - startTime > timeout:
+                print("inp timeout")
+                break
+
+        print(inp)
+        #gameThread = Thread(target=self.playGame, args=())
+        #gameThread.start()
+
+        while True:
+            try:
+                # server game over msg
+                winner = self.tcp_socket.recv(BUFFER_SIZE).decode()
+                print(winner)
+                break
+            except:
+                continue
+
+    def playGame(self):
+        """
+        def nothing(sig, frame):pass
+        print("play game")
+        signal.signal(signal.SIGALRM,nothing)
+        signal.alarm(5)
+        try:
+            print("before in")
+            ans = input()
+            print("after in")
+            signal.alarm(0)
+            #ans = getche()
+            print(ans)
+            print("input timeout")
+            self.tcp_socket.send(ans.encode())
+        except:
+            print('game bad')
+            #self.tcp_socket.close()  # why?
+        """
+
+
 
 client=Client()
 client.start_run()

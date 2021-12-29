@@ -139,7 +139,7 @@ class Server:
         """
         self.udp_socket.bind((SERVER_IP, UDP_SERVER_PORT))
         self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)  # as is
-
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.tcp_socket.bind((SERVER_IP, TCP_SERVER_PORT))
         self.tcp_socket.listen(20)
         self.tcp_socket.settimeout(1) # ???
