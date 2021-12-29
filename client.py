@@ -15,10 +15,8 @@ class Client:
         self.team_name = "PyCharmers"
         self.udp_socket = socket(AF_INET, SOCK_DGRAM)
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
-        #self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
         self.udp_socket.bind(('', localPORTUDP))
-        #self.udp_socket.settimeout(1)
 
     def connect_to_server(self, server_ip, server_port):
         """
@@ -26,7 +24,6 @@ class Client:
         """
         try:
             self.tcp_socket.connect((server_ip, server_port))
-            print("Connected to Server")
         except:
             return
 
@@ -43,7 +40,7 @@ class Client:
         and then sends the Client's Team Name to the Server
         """
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
-        print("Client Started, listening for offer requests...")
+        print(" Client Started, listening for offer requests...")
 
         while True:
             try:
@@ -54,7 +51,7 @@ class Client:
                 server_port = unpacked_msg[2]
                 if magic_cookie != MAGIC_COOKIE or msg_type != MSG_TYPE:
                     continue
-                print(f'Received offer from {server_address[0]}, attempting to connect...')
+                print(f' Received offer from {server_address[0]}, attempting to connect...')
                 self.connect_to_server(server_address[0], server_port)
                 self.send_name()
                 self.connected()
@@ -79,7 +76,7 @@ class Client:
                 winner = self.tcp_socket.recv(BUFFER_SIZE).decode()
                 print(winner)
                 self.tcp_socket.close()
-                print("server disconnected, listening for offer requests...")
+                print("\033[97m server disconnected, listening for offer requests...")
                 break
             except:
                 continue
