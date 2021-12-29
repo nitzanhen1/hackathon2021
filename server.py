@@ -38,9 +38,9 @@ class Server:
 
     def send_broadcast_messages(self, udp_socket):
         print(f"\033[94m Server started, listening on IP address {SERVER_IP}")
-        message_to_send = struct.pack('Ibh', MAGIC_COOKIE, MSG_TYPE, TCP_SERVER_PORT)
+        message_to_send = struct.pack('IbH', MAGIC_COOKIE, MSG_TYPE, TCP_SERVER_PORT)
         while len(self.players_names) < 2:
-            udp_socket.sendto(message_to_send, ('<broadcast>', UDP_DEST_PORT))
+            udp_socket.sendto(message_to_send,  ('172.99.255.255',UDP_DEST_PORT))
             time.sleep(1)
 
 
