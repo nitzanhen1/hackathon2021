@@ -25,8 +25,8 @@ class Server:
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
         self.udp_socket.bind(('172.99.255.255', UDP_DEST_PORT))
         self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)  # as is
-        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self.tcp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.udp_socket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
+        self.tcp_socket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
         self.tcp_socket.bind((SERVER_IP, TCP_SERVER_PORT))
         #self.tcp_socket.listen(20)
         self.tcp_socket.settimeout(1)
