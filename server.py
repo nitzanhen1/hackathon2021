@@ -8,8 +8,9 @@ from socket import *
 from threading import *
 import struct
 import random
+from scapy.arch import get_if_addr
 
-SERVER_IP = gethostbyname(gethostname()) #'172.99.0.37'
+SERVER_IP = get_if_addr("eth2") #'172.99.0.37'
 UDP_SERVER_PORT = 2037
 TCP_SERVER_PORT = 12177
 UDP_DEST_PORT = 13117
