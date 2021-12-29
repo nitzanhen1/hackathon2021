@@ -21,7 +21,7 @@ event = Event()
 
 class Server:
     def __init__(self):
-        self.udp_socket = socket(AF_INET, SOCK_DGRAM)
+        self.udp_socket = socket(AF_INET, SOCK_DGRAM,IPPROTO_UDP)
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
         self.udp_socket.bind(('172.99.255.255', UDP_SERVER_PORT))
         self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)  # as is
